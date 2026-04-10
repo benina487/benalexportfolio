@@ -56,7 +56,7 @@ const ChatBot = () => {
       {open && (
         <div className="fixed bottom-24 right-6 z-50 w-80 sm:w-96 glass rounded-xl overflow-hidden animate-fade-in-up flex flex-col" style={{ maxHeight: "480px" }}>
           <div className="px-4 py-3 border-b border-border flex items-center gap-2">
-            <div className="w-2 h-2 rounded-full bg-green-400" />
+            <div className="w-2 h-2 rounded-full bg-primary" />
             <span className="font-heading font-semibold text-sm">Portfolio Assistant</span>
           </div>
 
