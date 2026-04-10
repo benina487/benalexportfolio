@@ -1,20 +1,32 @@
 import { useState } from "react";
 import { Send, MapPin, Mail, Phone } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 
 const ContactSection = () => {
   const { toast } = useToast();
   const [form, setForm] = useState({ name: "", email: "", message: "" });
   const [sending, setSending] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!form.name.trim() || !form.email.trim() || !form.message.trim()) {
+      toast({ title: "Please fill all fields", variant: "destructive" });
+      return;
+    }
     setSending(true);
-    setTimeout(() => {
+    const { error } = await supabase.from("contact_messages").insert({
+      name: form.name.trim(),
+      email: form.email.trim(),
+      message: form.message.trim(),
+    });
+    if (error) {
+      toast({ title: "Failed to send message", description: error.message, variant: "destructive" });
+    } else {
       toast({ title: "Message sent!", description: "Thank you for reaching out. I'll get back to you soon." });
       setForm({ name: "", email: "", message: "" });
-      setSending(false);
-    }, 1000);
+    }
+    setSending(false);
   };
 
   return (
@@ -32,7 +44,6 @@ const ContactSection = () => {
             <h3 className="font-heading text-xl font-semibold mb-6">Let's work together</h3>
             <p className="text-muted-foreground mb-8 leading-relaxed">
               I'm always open to discussing new projects, opportunities, and collaborations.
-              Feel free to reach out!
             </p>
             <div className="space-y-4">
               {[

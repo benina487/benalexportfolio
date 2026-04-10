@@ -1,47 +1,127 @@
 import { useState, useRef, useEffect } from "react";
 import { MessageCircle, X, Send } from "lucide-react";
+import ReactMarkdown from "react-markdown";
 
-type Msg = { role: "user" | "bot"; text: string };
+type Msg = { role: "user" | "assistant"; content: string };
 
-const responses: Record<string, string> = {
-  "who are you": "I'm Benina A, a B.Tech student in AI & Data Science at Francis Xavier Engineering College. I'm passionate about full-stack development, machine learning, and building intelligent systems!",
-  "skills": "My key skills include Python, Java, C, JavaScript, React, HTML/CSS, MySQL, Machine Learning, Computer Vision, Power BI, Tableau, and Cybersecurity fundamentals.",
-  "projects": "Some of my projects:\n• Hawk Eye – Secure access management system\n• BioPulse – AI-based plant stress detection\n• Voice Biometric Auth – Vocal characteristic verification\n• Landslide Detection – IoT-based monitoring system\n• Mental Health Chatbot – Mood tracker with AI",
-  "contact": "You can reach me at ben10alexantony@gmail.com or +91 8122072978. I'm based in TamilNadu, India.",
-  "experience": "I interned at Clear Trust, Bangalore as an AI Engineer (Jul-Aug 2025), where I developed a voice biometric authentication system.",
-  "education": "I'm pursuing B.Tech in AI & Data Science at Francis Xavier Engineering College, Tirunelveli (2023-2027) with a CGPA of 9.5.",
+const CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/chat`;
+
+async function streamChat({
+  messages,
+  onDelta,
+  onDone,
+  onError,
+}: {
+  messages: Msg[];
+  onDelta: (text: string) => void;
+  onDone: () => void;
+  onError: (err: string) => void;
+}) {
+  try {
+    const resp = await fetch(CHAT_URL, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+      },
+      body: JSON.stringify({ messages }),
+    });
+
+    if (resp.status === 429) { onError("Rate limited. Please try again shortly."); return; }
+    if (resp.status === 402) { onError("AI credits exhausted."); return; }
+    if (!resp.ok || !resp.body) { onError("Failed to connect to AI."); return; }
+
+    const reader = resp.body.getReader();
+    const decoder = new TextDecoder();
+    let buf = "";
+    let done = false;
+
+    while (!done) {
+      const { done: d, value } = await reader.read();
+      if (d) break;
+      buf += decoder.decode(value, { stream: true });
+
+      let idx: number;
+      while ((idx = buf.indexOf("\n")) !== -1) {
+        let line = buf.slice(0, idx);
+        buf = buf.slice(idx + 1);
+        if (line.endsWith("\r")) line = line.slice(0, -1);
+        if (!line.startsWith("data: ")) continue;
+        const json = line.slice(6).trim();
+        if (json === "[DONE]") { done = true; break; }
+        try {
+          const parsed = JSON.parse(json);
+          const content = parsed.choices?.[0]?.delta?.content;
+          if (content) onDelta(content);
+        } catch { buf = line + "\n" + buf; break; }
+      }
+    }
+    onDone();
+  } catch {
+    onError("Network error. Please try again.");
+  }
+}
+
+// Fallback responses when AI is unavailable
+const fallbackResponses: Record<string, string> = {
+  "who are you": "I'm Benina A, a B.Tech student in AI & Data Science at Francis Xavier Engineering College.",
+  "skills": "Python, Java, C, JavaScript, React, MySQL, ML, Computer Vision, Power BI, Tableau, Cybersecurity.",
+  "projects": "• Hawk Eye – Access management\n• BioPulse – Plant stress detection\n• Voice Biometric Auth\n• Landslide Detection IoT\n• Mental Health Chatbot",
+  "contact": "Email: ben10alexantony@gmail.com | Phone: +91 8122072978",
 };
 
-function getResponse(input: string): string {
+function getFallback(input: string): string {
   const lower = input.toLowerCase();
-  for (const [key, val] of Object.entries(responses)) {
+  for (const [key, val] of Object.entries(fallbackResponses)) {
     if (lower.includes(key)) return val;
   }
-  if (lower.includes("hello") || lower.includes("hi")) return "Hey there! 👋 I'm Benina's portfolio assistant. Ask me about her skills, projects, experience, or education!";
-  if (lower.includes("resume") || lower.includes("cv")) return "You can download Benina's resume using the 'Download Resume' button in the hero section!";
-  return "Interesting question! I can tell you about Benina's skills, projects, experience, education, or contact info. What would you like to know?";
+  if (lower.includes("hello") || lower.includes("hi")) return "Hey! 👋 Ask me about Benina's skills, projects, or experience!";
+  return "I can tell you about Benina's skills, projects, experience, or education. What would you like to know?";
 }
 
 const ChatBot = () => {
   const [open, setOpen] = useState(false);
   const [messages, setMessages] = useState<Msg[]>([
-    { role: "bot", text: "Hi! 👋 I'm Benina's portfolio assistant. Ask me anything about her skills, projects, or experience!" },
+    { role: "assistant", content: "Hi! 👋 I'm Benina's AI portfolio assistant. Ask me anything about her skills, projects, or experience!" },
   ]);
   const [input, setInput] = useState("");
+  const [loading, setLoading] = useState(false);
   const endRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     endRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
-  const send = () => {
-    if (!input.trim()) return;
-    const userMsg: Msg = { role: "user", text: input.trim() };
-    setMessages((prev) => [...prev, userMsg]);
+  const send = async () => {
+    if (!input.trim() || loading) return;
+    const userMsg: Msg = { role: "user", content: input.trim() };
+    const allMessages = [...messages, userMsg];
+    setMessages(allMessages);
     setInput("");
-    setTimeout(() => {
-      setMessages((prev) => [...prev, { role: "bot", text: getResponse(userMsg.text) }]);
-    }, 500);
+    setLoading(true);
+
+    let assistantSoFar = "";
+    const upsert = (chunk: string) => {
+      assistantSoFar += chunk;
+      setMessages((prev) => {
+        const last = prev[prev.length - 1];
+        if (last?.role === "assistant" && prev.length > allMessages.length) {
+          return prev.map((m, i) => (i === prev.length - 1 ? { ...m, content: assistantSoFar } : m));
+        }
+        return [...prev.slice(0, allMessages.length), { role: "assistant", content: assistantSoFar }];
+      });
+    };
+
+    await streamChat({
+      messages: allMessages.map(({ role, content }) => ({ role, content })),
+      onDelta: upsert,
+      onDone: () => setLoading(false),
+      onError: (err) => {
+        console.warn("AI error, using fallback:", err);
+        setMessages((prev) => [...prev, { role: "assistant", content: getFallback(userMsg.content) }]);
+        setLoading(false);
+      },
+    });
   };
 
   return (
@@ -57,23 +137,34 @@ const ChatBot = () => {
         <div className="fixed bottom-24 right-6 z-50 w-80 sm:w-96 glass rounded-xl overflow-hidden animate-fade-in-up flex flex-col" style={{ maxHeight: "480px" }}>
           <div className="px-4 py-3 border-b border-border flex items-center gap-2">
             <div className="w-2 h-2 rounded-full bg-primary" />
-            <span className="font-heading font-semibold text-sm">Portfolio Assistant</span>
+            <span className="font-heading font-semibold text-sm">AI Portfolio Assistant</span>
           </div>
 
           <div className="flex-1 overflow-y-auto p-4 space-y-3" style={{ minHeight: "280px" }}>
             {messages.map((m, i) => (
               <div key={i} className={`flex ${m.role === "user" ? "justify-end" : "justify-start"}`}>
                 <div
-                  className={`max-w-[80%] px-3 py-2 rounded-lg text-sm whitespace-pre-line ${
+                  className={`max-w-[80%] px-3 py-2 rounded-lg text-sm ${
                     m.role === "user"
                       ? "bg-primary text-primary-foreground"
                       : "bg-secondary text-foreground"
                   }`}
                 >
-                  {m.text}
+                  {m.role === "assistant" ? (
+                    <div className="prose prose-sm prose-invert max-w-none">
+                      <ReactMarkdown>{m.content}</ReactMarkdown>
+                    </div>
+                  ) : m.content}
                 </div>
               </div>
             ))}
+            {loading && messages[messages.length - 1]?.role === "user" && (
+              <div className="flex justify-start">
+                <div className="px-3 py-2 rounded-lg bg-secondary text-muted-foreground text-sm">
+                  Thinking...
+                </div>
+              </div>
+            )}
             <div ref={endRef} />
           </div>
 
@@ -84,10 +175,12 @@ const ChatBot = () => {
               onKeyDown={(e) => e.key === "Enter" && send()}
               placeholder="Ask about skills, projects..."
               className="flex-1 px-3 py-2 rounded-lg bg-secondary text-foreground text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary"
+              disabled={loading}
             />
             <button
               onClick={send}
-              className="w-9 h-9 rounded-lg bg-primary text-primary-foreground flex items-center justify-center hover:opacity-90 transition-opacity"
+              disabled={loading}
+              className="w-9 h-9 rounded-lg bg-primary text-primary-foreground flex items-center justify-center hover:opacity-90 transition-opacity disabled:opacity-50"
             >
               <Send size={14} />
             </button>
