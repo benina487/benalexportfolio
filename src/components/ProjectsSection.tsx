@@ -1,64 +1,68 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { ExternalLink, Github } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
 
 type Project = {
+  id: string;
   title: string;
-  desc: string;
-  tech: string[];
+  description: string;
+  tech_stack: string[];
   category: string;
-  github: string;
-  live?: string;
+  github_url: string | null;
+  live_url: string | null;
 };
 
-const projects: Project[] = [
+const staticProjects: Project[] = [
   {
-    title: "Hawk Eye – Access Management",
-    desc: "Secure access management system with role-based auth, real-time monitoring, and encrypted communication channels.",
-    tech: ["Python", "Flask", "MySQL", "JWT"],
-    category: "Security",
-    github: "https://github.com/benina487",
+    id: "1", title: "Hawk Eye – Access Management",
+    desc: "Secure access management system with role-based auth, real-time monitoring, and encrypted communication.",
+    tech_stack: ["Python", "Flask", "MySQL", "JWT"], category: "Security",
+    github_url: "https://github.com/benina487", live_url: null,
   },
   {
-    title: "BioPulse – Plant Stress Detection",
-    desc: "AI-powered plant health analysis using Computer Vision to detect stress patterns and recommend treatments.",
-    tech: ["Python", "TensorFlow", "OpenCV", "React"],
-    category: "AI",
-    github: "https://github.com/benina487",
+    id: "2", title: "BioPulse – Plant Stress Detection",
+    desc: "AI-powered plant health analysis using Computer Vision to detect stress patterns.",
+    tech_stack: ["Python", "TensorFlow", "OpenCV", "React"], category: "AI",
+    github_url: "https://github.com/benina487", live_url: null,
   },
   {
-    title: "Voice Biometric Auth System",
-    desc: "Authenticates users via unique vocal characteristics – pitch, cadence, tone, and pronunciation analysis.",
-    tech: ["Python", "ML", "Signal Processing", "Flask"],
-    category: "AI",
-    github: "https://github.com/benina487",
+    id: "3", title: "Voice Biometric Auth System",
+    desc: "Authenticates users via unique vocal characteristics – pitch, cadence, tone analysis.",
+    tech_stack: ["Python", "ML", "Signal Processing", "Flask"], category: "AI",
+    github_url: "https://github.com/benina487", live_url: null,
   },
   {
-    title: "Landslide Detection IoT System",
-    desc: "Sensor-based real-time monitoring with threshold alerts and automated warnings for landslide-prone areas.",
-    tech: ["IoT", "Python", "Data Logging", "APIs"],
-    category: "Data",
-    github: "https://github.com/benina487",
+    id: "4", title: "Landslide Detection IoT System",
+    desc: "Sensor-based real-time monitoring with threshold alerts for landslide-prone areas.",
+    tech_stack: ["IoT", "Python", "Data Logging", "APIs"], category: "Data",
+    github_url: "https://github.com/benina487", live_url: null,
   },
   {
-    title: "Gold vs Silver Rate Dashboard",
-    desc: "Interactive data analytics dashboard comparing precious metal rates with trend analysis and visualizations.",
-    tech: ["Power BI", "Python", "Data Analysis"],
-    category: "Data",
-    github: "https://github.com/benina487",
+    id: "5", title: "Gold vs Silver Rate Dashboard",
+    desc: "Interactive data analytics dashboard comparing precious metal rates with trend analysis.",
+    tech_stack: ["Power BI", "Python", "Data Analysis"], category: "Data",
+    github_url: "https://github.com/benina487", live_url: null,
   },
   {
-    title: "Mental Health Chatbot",
-    desc: "AI chatbot with mood tracking, emotional analysis, and personalized meditation recommendations for employees.",
-    tech: ["Python", "NLP", "React", "APIs"],
-    category: "Web",
-    github: "https://github.com/benina487",
+    id: "6", title: "Mental Health Chatbot",
+    desc: "AI chatbot with mood tracking, emotional analysis, and personalized meditation recommendations.",
+    tech_stack: ["Python", "NLP", "React", "APIs"], category: "Web",
+    github_url: "https://github.com/benina487", live_url: null,
   },
-];
+].map((p) => ({ ...p, description: (p as any).desc }));
 
 const filters = ["All", "AI", "Web", "Data", "Security"];
 
 const ProjectsSection = () => {
   const [active, setActive] = useState("All");
+  const [projects, setProjects] = useState<Project[]>(staticProjects);
+
+  useEffect(() => {
+    supabase.from("projects").select("*").eq("is_visible", true).order("display_order").then(({ data }) => {
+      if (data && data.length > 0) setProjects(data);
+    });
+  }, []);
+
   const filtered = active === "All" ? projects : projects.filter((p) => p.category === active);
 
   return (
@@ -90,7 +94,7 @@ const ProjectsSection = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {filtered.map((p) => (
             <div
-              key={p.title}
+              key={p.id}
               className="glass rounded-xl overflow-hidden group hover:glow-primary transition-all duration-300 hover:-translate-y-1"
             >
               <div className="h-2 w-full" style={{ background: "var(--gradient-primary)" }} />
@@ -99,34 +103,23 @@ const ProjectsSection = () => {
                   {p.title}
                 </h3>
                 <p className="text-sm text-muted-foreground mb-4 leading-relaxed">
-                  {p.desc}
+                  {p.description}
                 </p>
                 <div className="flex flex-wrap gap-2 mb-4">
-                  {p.tech.map((t) => (
-                    <span
-                      key={t}
-                      className="px-2 py-1 text-xs rounded bg-secondary text-muted-foreground"
-                    >
+                  {p.tech_stack.map((t) => (
+                    <span key={t} className="px-2 py-1 text-xs rounded bg-secondary text-muted-foreground">
                       {t}
                     </span>
                   ))}
                 </div>
                 <div className="flex gap-3">
-                  <a
-                    href={p.github}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex items-center gap-1 text-sm text-muted-foreground hover:text-primary transition-colors"
-                  >
-                    <Github size={14} /> Code
-                  </a>
-                  {p.live && (
-                    <a
-                      href={p.live}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="flex items-center gap-1 text-sm text-muted-foreground hover:text-primary transition-colors"
-                    >
+                  {p.github_url && (
+                    <a href={p.github_url} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1 text-sm text-muted-foreground hover:text-primary transition-colors">
+                      <Github size={14} /> Code
+                    </a>
+                  )}
+                  {p.live_url && (
+                    <a href={p.live_url} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1 text-sm text-muted-foreground hover:text-primary transition-colors">
                       <ExternalLink size={14} /> Demo
                     </a>
                   )}
