@@ -49,6 +49,18 @@ const staticProjects: Project[] = [
     tech_stack: ["Python", "NLP", "React", "APIs"], category: "Web",
     github_url: "https://github.com/benina487", live_url: null,
   },
+  {
+    id: "7", title: "Chronos Forecast",
+    desc: "Predictive modeling system that analyzes behavioral patterns to forecast procrastination risks and suggest interventions.",
+    tech_stack: ["Python", "Machine Learning", "Behavioral Analytics", "Flask"], category: "AI",
+    github_url: "https://github.com/benina487", live_url: null,
+  },
+  {
+    id: "8", title: "Library Management System",
+    desc: "Full-stack library management solution with book cataloging, user management, and automated due-date tracking.",
+    tech_stack: ["Java", "MySQL", "Swing/JavaFX", "OOP"], category: "Web",
+    github_url: "https://github.com/benina487", live_url: null,
+  },
 ].map((p) => ({ ...p, description: (p as any).desc }));
 
 const filters = ["All", "AI", "Web", "Data", "Security"];
