@@ -94,7 +94,7 @@ const HeroSection = () => {
         <div className="flex-shrink-0 relative">
           <div className="w-64 h-64 sm:w-80 sm:h-80 rounded-full overflow-hidden gradient-border glow-primary animate-float">
             <img
-              src={profileImg}
+              src={`${profileImg}?v=2`}
               alt="Benina A"
               className="w-full h-full object-cover"
               style={{ objectPosition: "center 55%" }}
