@@ -92,9 +92,9 @@ const HeroSection = () => {
         </div>
 
         <div className="flex-shrink-0 relative">
-          <div className="w-64 h-64 sm:w-80 sm:h-80 rounded-full overflow-hidden gradient-border glow-primary animate-float">
+          <div className="w-56 h-80 sm:w-64 sm:h-96 rounded-[2.5rem] overflow-hidden gradient-border glow-primary animate-float">
             <img
-              src={`${profileImg}?v=2`}
+              src={profileImg}
               alt="Benina A"
               className="w-full h-full object-cover"
               style={{ objectPosition: "center 55%" }}
