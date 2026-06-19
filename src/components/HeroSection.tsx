@@ -97,7 +97,7 @@ const HeroSection = () => {
               src={profileImg}
               alt="Benina A"
               className="w-full h-full object-cover"
-              style={{ objectPosition: "center 5%" }}
+              style={{ objectPosition: "center top" }}
             />
           </div>
         </div>
