@@ -35,10 +35,6 @@ const HeroSection = () => {
     return () => clearTimeout(timeout);
   }, [text, deleting, roleIndex]);
 
-  const resetCrop = () => {
-    setZoom(1.15);
-    setOffsetY(40);
-  };
 
   useEffect(() => {
     localStorage.setItem("profile-zoom", zoom.toString());
