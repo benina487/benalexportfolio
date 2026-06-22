@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
-import { ArrowDown, Download, Github, Linkedin, Mail } from "lucide-react";
+import { ArrowDown, Download, Github, Linkedin, Mail, RotateCcw } from "lucide-react";
+import { Slider } from "@/components/ui/slider";
 import profileImg from "@/assets/profile.png";
 
 const roles = ["Full Stack Developer", "ML Engineer", "Data Analyst", "AI Enthusiast"];
@@ -8,6 +9,8 @@ const HeroSection = () => {
   const [roleIndex, setRoleIndex] = useState(0);
   const [text, setText] = useState("");
   const [deleting, setDeleting] = useState(false);
+  const [zoom, setZoom] = useState(1.15);
+  const [offsetY, setOffsetY] = useState(40);
 
   useEffect(() => {
     const current = roles[roleIndex];
@@ -26,6 +29,12 @@ const HeroSection = () => {
 
     return () => clearTimeout(timeout);
   }, [text, deleting, roleIndex]);
+
+  const resetCrop = () => {
+    setZoom(1.15);
+    setOffsetY(40);
+  };
+
 
   return (
     <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
