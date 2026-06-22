@@ -100,16 +100,53 @@ const HeroSection = () => {
           </div>
         </div>
 
-        <div className="flex-shrink-0 relative">
+        <div className="flex-shrink-0 relative flex flex-col items-center gap-4">
           <div className="w-56 h-56 sm:w-64 sm:h-64 rounded-full overflow-hidden gradient-border glow-primary animate-float">
             <img
               src={profileImg}
               alt="Benina A"
               className="w-full h-full object-cover"
-              style={{ objectPosition: "center top", transform: "scale(1.15)" }}
+              style={{ objectPosition: `center ${offsetY}%`, transform: `scale(${zoom})` }}
             />
           </div>
+
+          <div className="w-56 sm:w-64 p-4 rounded-2xl glass space-y-3">
+            <div className="space-y-1">
+              <div className="flex justify-between text-xs text-muted-foreground">
+                <span>Zoom</span>
+                <span>{zoom.toFixed(2)}x</span>
+              </div>
+              <Slider
+                value={[zoom]}
+                min={1}
+                max={2}
+                step={0.01}
+                onValueChange={(value) => setZoom(value[0])}
+              />
+            </div>
+            <div className="space-y-1">
+              <div className="flex justify-between text-xs text-muted-foreground">
+                <span>Vertical position</span>
+                <span>{offsetY}%</span>
+              </div>
+              <Slider
+                value={[offsetY]}
+                min={0}
+                max={100}
+                step={1}
+                onValueChange={(value) => setOffsetY(value[0])}
+              />
+            </div>
+            <button
+              type="button"
+              onClick={resetCrop}
+              className="w-full flex items-center justify-center gap-2 py-2 rounded-lg text-xs font-medium text-muted-foreground hover:text-foreground hover:bg-primary/10 transition-colors"
+            >
+              <RotateCcw size={14} /> Reset
+            </button>
+          </div>
         </div>
+
       </div>
 
       <a
