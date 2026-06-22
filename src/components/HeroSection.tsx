@@ -1,6 +1,5 @@
 import { useState, useEffect } from "react";
-import { ArrowDown, Download, Github, Linkedin, Mail, RotateCcw } from "lucide-react";
-import { Slider } from "@/components/ui/slider";
+import { ArrowDown, Download, Github, Linkedin, Mail } from "lucide-react";
 import profileImg from "@/assets/profile.png";
 
 const roles = ["Full Stack Developer", "ML Engineer", "Data Analyst", "AI Enthusiast"];
