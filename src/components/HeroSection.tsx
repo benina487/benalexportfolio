@@ -41,6 +41,14 @@ const HeroSection = () => {
     setOffsetY(40);
   };
 
+  useEffect(() => {
+    localStorage.setItem("profile-zoom", zoom.toString());
+  }, [zoom]);
+
+  useEffect(() => {
+    localStorage.setItem("profile-offset-y", offsetY.toString());
+  }, [offsetY]);
+
 
   return (
     <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
