@@ -9,8 +9,14 @@ const HeroSection = () => {
   const [roleIndex, setRoleIndex] = useState(0);
   const [text, setText] = useState("");
   const [deleting, setDeleting] = useState(false);
-  const [zoom, setZoom] = useState(1.15);
-  const [offsetY, setOffsetY] = useState(40);
+  const [zoom, setZoom] = useState(() => {
+    const saved = typeof window !== "undefined" ? localStorage.getItem("profile-zoom") : null;
+    return saved ? parseFloat(saved) : 1.15;
+  });
+  const [offsetY, setOffsetY] = useState(() => {
+    const saved = typeof window !== "undefined" ? localStorage.getItem("profile-offset-y") : null;
+    return saved ? parseInt(saved, 10) : 40;
+  });
 
   useEffect(() => {
     const current = roles[roleIndex];
@@ -34,6 +40,14 @@ const HeroSection = () => {
     setZoom(1.15);
     setOffsetY(40);
   };
+
+  useEffect(() => {
+    localStorage.setItem("profile-zoom", zoom.toString());
+  }, [zoom]);
+
+  useEffect(() => {
+    localStorage.setItem("profile-offset-y", offsetY.toString());
+  }, [offsetY]);
 
 
   return (
