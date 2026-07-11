@@ -83,8 +83,10 @@ const HeroSection = () => {
               View Projects
             </a>
             <a
-              href="/resume.pdf"
+              href={resumeAsset.url}
+              download="Ben_A_Resume.pdf"
               target="_blank"
+              rel="noopener noreferrer"
               className="px-6 py-3 rounded-lg glass text-foreground font-medium hover:border-primary/30 transition-colors flex items-center gap-2"
             >
               <Download size={16} /> Download Resume
