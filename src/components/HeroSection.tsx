@@ -10,12 +10,12 @@ const HeroSection = () => {
   const [text, setText] = useState("");
   const [deleting, setDeleting] = useState(false);
   const [zoom, setZoom] = useState(() => {
-    const saved = typeof window !== "undefined" ? localStorage.getItem("profile-zoom") : null;
-    return saved ? parseFloat(saved) : 1.15;
+    const saved = typeof window !== "undefined" ? localStorage.getItem("profile-zoom-v2") : null;
+    return saved ? parseFloat(saved) : 1.0;
   });
   const [offsetY, setOffsetY] = useState(() => {
-    const saved = typeof window !== "undefined" ? localStorage.getItem("profile-offset-y") : null;
-    return saved ? parseInt(saved, 10) : 40;
+    const saved = typeof window !== "undefined" ? localStorage.getItem("profile-offset-v2") : null;
+    return saved ? parseInt(saved, 10) : 22;
   });
 
   useEffect(() => {
@@ -38,11 +38,11 @@ const HeroSection = () => {
 
 
   useEffect(() => {
-    localStorage.setItem("profile-zoom", zoom.toString());
+    localStorage.setItem("profile-zoom-v2", zoom.toString());
   }, [zoom]);
 
   useEffect(() => {
-    localStorage.setItem("profile-offset-y", offsetY.toString());
+    localStorage.setItem("profile-offset-v2", offsetY.toString());
   }, [offsetY]);
 
 
@@ -113,7 +113,7 @@ const HeroSection = () => {
         </div>
 
         <div className="flex-shrink-0 relative flex flex-col items-center gap-4">
-          <div className="w-56 h-56 sm:w-64 sm:h-64 rounded-full overflow-hidden gradient-border glow-primary animate-float">
+          <div className="w-60 h-60 sm:w-72 sm:h-72 rounded-full overflow-hidden gradient-border glow-primary animate-float">
             <img
               src={profileImg}
               alt="Benina A"
