@@ -3,12 +3,10 @@ import { ArrowDown, Download, Github, Linkedin, Mail } from "lucide-react";
 import profileImg from "@/assets/profile.png";
 import resumeAsset from "@/assets/Ben_A_Resume.pdf.asset.json";
 
-const roles = ["Full Stack Developer", "ML Engineer", "Data Analyst", "AI Enthusiast"];
+const role = "AI & ML Engineer";
 
 const HeroSection = () => {
-  const [roleIndex, setRoleIndex] = useState(0);
   const [text, setText] = useState("");
-  const [deleting, setDeleting] = useState(false);
   const [zoom, setZoom] = useState(() => {
     const saved = typeof window !== "undefined" ? localStorage.getItem("profile-zoom-v2") : null;
     return saved ? parseFloat(saved) : 1.0;
@@ -19,22 +17,10 @@ const HeroSection = () => {
   });
 
   useEffect(() => {
-    const current = roles[roleIndex];
-    let timeout: ReturnType<typeof setTimeout>;
-
-    if (!deleting && text.length < current.length) {
-      timeout = setTimeout(() => setText(current.slice(0, text.length + 1)), 80);
-    } else if (!deleting && text.length === current.length) {
-      timeout = setTimeout(() => setDeleting(true), 1800);
-    } else if (deleting && text.length > 0) {
-      timeout = setTimeout(() => setText(text.slice(0, -1)), 40);
-    } else if (deleting && text.length === 0) {
-      setDeleting(false);
-      setRoleIndex((i) => (i + 1) % roles.length);
-    }
-
+    if (text.length >= role.length) return;
+    const timeout = setTimeout(() => setText(role.slice(0, text.length + 1)), 80);
     return () => clearTimeout(timeout);
-  }, [text, deleting, roleIndex]);
+  }, [text]);
 
 
   useEffect(() => {
