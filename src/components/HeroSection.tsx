@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
 import { ArrowDown, Download, Github, Linkedin, Mail } from "lucide-react";
 import profileImg from "@/assets/profile.png";
-import resumeAsset from "@/assets/Ben_A_Resume.pdf.asset.json";
 
 const role = "AI & ML Engineer";
 
@@ -69,7 +68,7 @@ const HeroSection = () => {
               View Projects
             </a>
             <a
-              href={resumeAsset.url}
+              href="/Ben_A_Resume.pdf"
               download="Ben_A_Resume.pdf"
               target="_blank"
               rel="noopener noreferrer"
