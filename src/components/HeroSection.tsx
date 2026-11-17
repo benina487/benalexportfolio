@@ -68,7 +68,7 @@ const HeroSection = () => {
               View Projects
             </a>
             <a
-              href="/Ben_A_Resume.pdf"
+              href={`${import.meta.env.BASE_URL}Ben_A_Resume.pdf`}
               download="Ben_A_Resume.pdf"
               target="_blank"
               rel="noopener noreferrer"
