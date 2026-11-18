@@ -1,0 +1,1 @@
+Use `/benalexportfolio/` as the GitHub Pages base path and keep client-side routing and root-relative asset links compatible with the repository subpath, because this site is hosted beneath a project URL.
